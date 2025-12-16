@@ -6,41 +6,42 @@
 /*   By: ethebaul <ethebaul@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/06 01:17:39 by ethebaul          #+#    #+#             */
-/*   Updated: 2025/12/16 06:09:20 by ethebaul         ###   ########.fr       */
+/*   Updated: 2025/12/16 09:32:59 by ethebaul         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdio.h>
 //((long)&buffer[10] & ~0xf)
-//((long *)((long)&buffer[10] & ~0xf))[1] canary
-//((long *)((long)&buffer[10] & ~0xf))[2] RBP
-//((long *)((long)&buffer[10] & ~0xf))[3] RIP
-int	ft_atoi(const char *nptr)
-{
-	long	buffer[4];
+//((long *)((long)&buffer[4] & ~0xf))[11] canary
+//((long *)((long)&buffer[4] & ~0xf))[12] RBP
+//((long *)((long)&buffer[4] & ~0xf))[13] RIP
 
-	buffer[0] = ((long *)((long)&buffer[4] & ~0xf))[1];
-	buffer[1] = ((long *)((long)&buffer[4] & ~0xf))[2];
-	buffer[2] = ((long *)((long)&buffer[4] & ~0xf))[3];
-	buffer[3] = 0xdeadbeef;
-	printf("vcanary	%p: %p\n", &buffer[0], (void *)buffer[0]);
-	printf("vRBP	%p: %p\n", &buffer[1], (void *)buffer[1]);
-	printf("vRIP	%p: %p\n", &buffer[2], (void *)buffer[2]);
-	printf("test	%p: %p\n", &buffer[3], (void *)buffer[3]);
-	printf("canary	%p: %p\n", &buffer[4], (void *)buffer[4]);
-	printf("RBP 	%p: %p\n", &buffer[5], (void *)buffer[5]);
-	printf("RIP 	%p: %p\n", &buffer[6], (void *)buffer[6]);
-	printf("\n");
-	((long *)((long)&buffer[3] & ~0xf))[2] = (long)&buffer[2];
-	((long *)((long)&buffer[3] & ~0xf))[3] = (long)ft_atoi;
+int	function(void)
+{
+	unsigned long	buffer[10];
+
+	buffer[13] = (unsigned long)function + 0x58;
+	buffer[12] = (unsigned long)&buffer[1];
+	buffer[2] = (unsigned long)function + 0x58;
+	buffer[1] = (unsigned long)&buffer[1];
+	buffer[0] = buffer[11];
+	printf("start\n");
+	printf("next\n");
+	return (0);
+}
+
+int	function2(void)
+{
+	unsigned long	buffer[10];
+
+	buffer[13] = (unsigned long)function2;
+	buffer[12] = (unsigned long)&buffer[12];
+	printf("loop %p\n", buffer[12]);
 	return (0);
 }
 
 int	main(void)
 {
-	const char	*str = "42";
-
-	ft_atoi(str);
-	printf("%s\n", str);
+	function2();
 	return (0);
 }
